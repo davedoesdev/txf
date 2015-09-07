@@ -1,0 +1,23 @@
+Sender should do: PUT /default/foo/hmac-of-foo
+- Checks the hmac matches first then waits until there is a GET of /foo
+
+Receiver should do: GET /default/foo/hmac-of-foo
+- Checks the hmac matches first then waits until there is a PUT of /foo
+
+When there is both a PUT and GET of /default/foo, pipes the sender to the
+receiver.
+
+hmac secrets should be passed in.
+
+Allow clients to timeout, up to them to retry.
+
+
+Reason for the hmac is you must have the secret OR been given a URL generated
+by someone with the secret. A receiver who has been sent a single URL cannot
+then send or receiver other files without the secret.
+There are two secrets per namespace (/default here) - one for sending and one
+for receiving.
+
+OpenShift can set custom environment variables (rhc env set) so could use that
+to set the hmac.
+On Travis/Semaphore/Circle we can do the same or use encrypted files.
