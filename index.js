@@ -23,18 +23,31 @@ module.exports = function (server, secrets)
 {
     server.on('request', function (request, response)
     {
-        var pathname = url.parse(request.url).pathname.split('/');
+        console.log(request.method, request.url);
 
-        if (pathname.length !== 4)
+        var pathname = url.parse(request.url).pathname.split('/'),
+            namespace,
+            digest,
+            id;
+
+        if (pathname.length === 4)
+        {
+            namespace = pathname[1];
+            digest = pathname[2];
+            id = pathname[3];
+        }
+        else if (pathname.length === 3)
+        {
+            namespace = pathname[1];
+            id = pathname[2];
+        }
+        else
         {
             response.writeHead(400);
             return response.end();
         }
 
-        var namespace = pathname[1],
-            id = pathname[2],
-            digest = pathname[3],
-            keys = secrets[namespace];
+        var keys = secrets[namespace];
 
         if (keys === undefined)
         {
