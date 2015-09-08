@@ -1,0 +1,29 @@
+{
+  "name": "txf",
+  "description": "File transfer service. Pipes PUT to GET. HMAC access control.",
+  "version": "0.0.1",
+  "homepage": "https://github.com/davedoesdev/txf",
+  "author": {
+    "name": "David Halls",
+    "email": "dave@davedoesdev.com",
+    "url": "http://www.davedoesdev.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davedoesdev/txf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/davedoesdev/txf/issues"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "start": "server.js"
+  },
+  "keywords": [
+    "file",
+    "share",
+    "transfer"
+  ]
+}
+
