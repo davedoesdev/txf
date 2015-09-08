@@ -11,6 +11,7 @@ var default_receiver_secret = process.env.DEFAULT_RECEIVER_SECRET || '';
 
 server.listen(port, ip, function()
 {
+    console.log('listening on', ip, port);
     txf(server, {
         default: { sender: default_sender_secret,
                    receiver: default_receiver_secret } });
