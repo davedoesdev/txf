@@ -9,6 +9,8 @@ var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 var default_sender_secret = process.env.DEFAULT_SENDER_SECRET || '';
 var default_receiver_secret = process.env.DEFAULT_RECEIVER_SECRET || '';
 
+console.log('starting', ip, port);
+
 server.listen(port, ip, function()
 {
     console.log('listening on', ip, port);
