@@ -11,11 +11,7 @@ function check(id)
 
     if (sender && receiver)
     {
-        sender.request.on('end', function ()
-        {
-            sender.response.end();
-        });
-        sender.request.pipe(receiver.response);
+        sender.pipe(receiver);
     }
 }
 
@@ -82,18 +78,22 @@ module.exports = function (server, secrets)
                 return response.end();
             }
 
-            senders[id] = { request: request, response: response };
+            request.response = response;
+            senders[id] = request;
 
             function sender_done()
             {
                 var sender = senders[id];
-                if ((sender !== undefined) &&
-                    (sender.request === request))
+                if (sender === request)
                 {
                     delete senders[id];
                 }
             }
 
+            request.on('end', function ()
+            {
+                response.end();
+            });
             request.on('close', sender_done);
             request.on('end', sender_done);
 
@@ -126,18 +126,26 @@ module.exports = function (server, secrets)
                 return response.end();
             }
 
-            receivers[id] = { request: request, response: response };
+            receivers[id] = response;
 
             function receiver_done()
             {
                 var receiver = receivers[id];
-                if ((receiver !== undefined) &&
-                    (receiver.response === response))
+                if (receiver === response)
                 {
                     delete receivers[id];
                 }
             }
 
+            response.on('pipe', function (sender)
+            {
+                response.on('close', function ()
+                {
+                    sender.unpipe(response);
+                    sender.response.writeHead(504);
+                    sender.response.end();
+                });
+            });
             response.on('close', receiver_done);
             response.on('finish', receiver_done);
 
