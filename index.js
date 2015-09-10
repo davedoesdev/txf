@@ -87,7 +87,8 @@ module.exports = function (server, secrets)
             function sender_done()
             {
                 var sender = senders[id];
-                if (sender && sender.request === request)
+                if ((sender !== undefined) &&
+                    (sender.request === request))
                 {
                     delete senders[id];
                 }
@@ -130,7 +131,8 @@ module.exports = function (server, secrets)
             function receiver_done()
             {
                 var receiver = receivers[id];
-                if (receiver && receiver.response === response)
+                if ((receiver !== undefined) &&
+                    (receiver.response === response))
                 {
                     delete receivers[id];
                 }
