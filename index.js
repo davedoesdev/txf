@@ -11,6 +11,7 @@ function check(id)
 
     if (sender && receiver)
     {
+        receiver.setHeader('Content-Type', sender.headers['content-type'] || 'application/octet-stream');
         sender.pipe(receiver);
     }
 }
