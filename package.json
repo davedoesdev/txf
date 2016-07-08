@@ -18,12 +18,27 @@
   "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "start": "supervisor server.js"
+    "start": "supervisor server.js",
+    "test": "grunt lint test",
+    "travis-test": "grunt lint coverage coveralls"
   },
   "keywords": [
     "file",
     "share",
     "transfer"
-  ]
+  ],
+  "engines": {
+    "node": ">= 0.12"
+  },
+  "devDependencies": {
+    "grunt": "~1.0.1",
+    "grunt-contrib-jshint": "~1.0.0",
+    "grunt-mocha-test": "~0.12.7",
+    "grunt-apidox": "~0.1.9",
+    "grunt-bg-shell": "~2.3.3",
+    "mocha": "~2.4.5",
+    "chai": "~3.5.0",
+    "istanbul": "~0.4.3",
+    "coveralls": "~2.11.9"
+  }
 }
-
