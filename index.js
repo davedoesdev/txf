@@ -2,22 +2,22 @@
 var url = require('url'),
     crypto = require('crypto');
 
-var senders = {}, receivers = {};
-
-function check(id)
-{
-    var sender = senders[id],
-        receiver = receivers[id];
-
-    if (sender && receiver)
-    {
-        receiver.setHeader('Content-Type', sender.headers['content-type'] || 'application/octet-stream');
-        sender.pipe(receiver);
-    }
-}
-
 module.exports = function (server, secrets)
 {
+    var senders = {}, receivers = {};
+
+    function check(id)
+    {
+        var sender = senders[id],
+            receiver = receivers[id];
+
+        if (sender && receiver)
+        {
+            receiver.setHeader('Content-Type', sender.headers['content-type'] || 'application/octet-stream');
+            sender.pipe(receiver);
+        }
+    }
+
     server.on('request', function (request, response)
     {
         console.log(request.method, request.url);
@@ -44,6 +44,12 @@ module.exports = function (server, secrets)
             return response.end();
         }
 
+        if (!secrets)
+        {
+            response.writeHead(403);
+            return response.end();
+        }
+
         var keys = secrets[namespace];
 
         if (keys === undefined)
@@ -54,19 +60,19 @@ module.exports = function (server, secrets)
 
         if (request.method === 'PUT')
         {
-            var key = keys.sender;
+            var sender_key = keys.sender;
 
-            if (key === undefined)
+            if (sender_key === undefined)
             {
                 response.writeHead(403);
                 return response.end();
             }
 
-            if (key.length > 0)
+            if (sender_key.length > 0)
             {
-                var hmac = crypto.createHmac('sha256', key);
-                hmac.update(id);
-                if (hmac.digest('hex') !== digest)
+                var sender_hmac = crypto.createHmac('sha256', sender_key);
+                sender_hmac.update(id);
+                if (sender_hmac.digest('hex') !== digest)
                 {
                     response.writeHead(404);
                     return response.end();
@@ -82,14 +88,14 @@ module.exports = function (server, secrets)
             request.response = response;
             senders[id] = request;
 
-            function sender_done()
+            var sender_done = function()
             {
                 var sender = senders[id];
                 if (sender === request)
                 {
                     delete senders[id];
                 }
-            }
+            };
 
             request.on('end', function ()
             {
@@ -102,19 +108,19 @@ module.exports = function (server, secrets)
         }
         else if (request.method === 'GET')
         {
-            var key = keys.receiver;
+            var receiver_key = keys.receiver;
 
-            if (key === undefined)
+            if (receiver_key === undefined)
             {
                 response.writeHead(403);
                 return response.end();
             }
 
-            if (key.length > 0)
+            if (receiver_key.length > 0)
             {
-                var hmac = crypto.createHmac('sha256', key);
-                hmac.update(id);
-                if (hmac.digest('hex') !== digest)
+                var receiver_hmac = crypto.createHmac('sha256', receiver_key);
+                receiver_hmac.update(id);
+                if (receiver_hmac.digest('hex') !== digest)
                 {
                     response.writeHead(404);
                     return response.end();
@@ -129,14 +135,14 @@ module.exports = function (server, secrets)
 
             receivers[id] = response;
 
-            function receiver_done()
+            var receiver_done = function()
             {
                 var receiver = receivers[id];
                 if (receiver === response)
                 {
                     delete receivers[id];
                 }
-            }
+            };
 
             response.on('pipe', function (sender)
             {
