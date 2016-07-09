@@ -1,9 +1,7 @@
 /*
-Test different status codes
 Test content-type headers
 Test with HTTPS?
 Check all senders and receivers are deleted
-100% coverage
 Make logging optional somehow?
 */
 
@@ -226,5 +224,28 @@ describe('txf', function ()
                    .update(path)
                    .digest('hex') + '/' +
                path;
+    });
+});
+
+describe('txf-no-secerts', function ()
+{
+    var server;
+
+    before(function (cb)
+    {
+        server = http.createServer();
+        server.listen(port, cb);
+        txf(server);
+    });
+
+    after(function (cb)
+    {
+        server.close(cb);
+    });
+
+    it('should error when no secrets have been supplied', function ()
+    {
+        var get_response = chakram.get(url + 'foo/bar');
+        return expect(get_response).to.have.status(403);
     });
 });
