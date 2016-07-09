@@ -2,8 +2,6 @@
 Test different status codes
 Test no auth and auth including wrong secret
 Test content-type headers
-Long paths
-Wrong number of path separators
 100% coverage
 Make logging optional somehow?
 */
@@ -25,7 +23,8 @@ var secrets = {
     prot: {
         sender: 'foobar',
         receiver: 'fred bloggs'
-    }
+    },
+    no_keys: {}
 };
 
 describe('txf', function ()
@@ -123,6 +122,51 @@ describe('txf', function ()
 
             chakram.wait()]);
         });
+
+        it('should error if too many levels in path', function ()
+        {
+            var get_response = chakram.get(make_get_url('bar/dummy1/dummy2'));
+            expect(get_response).to.have.status(400);
+            return chakram.wait();
+        });
+
+        it('should error if namespace unknown', function ()
+        {
+            var get_response = chakram.get(make_get_url('bar', 'dummy'));
+            expect(get_response).to.have.status(403);
+            return chakram.wait();
+        });
+
+        if (description === 'auth')
+        {
+            it('should error if receiver digest is wrong', function ()
+            {
+                var get_response = chakram.get(make_put_url('bar'));
+                expect(get_response).to.have.status(404);
+                return chakram.wait();
+            });
+
+            it('should error if sender digest is wrong', function ()
+            {
+                var put_response = chakram.put(make_get_url('bar'), 'hello');
+                expect(put_response).to.have.status(404);
+                return chakram.wait();
+            });
+        }
+
+        it('should error if namespace has no receiver key', function ()
+        {
+            var get_response = chakram.get(make_get_url('bar', 'no_keys'));
+            expect(get_response).to.have.status(403);
+            return chakram.wait();
+        });
+
+        it('should error if namespace has no sender key', function ()
+        {
+            var put_response = chakram.put(make_put_url('bar', 'no_keys'), 'hello');
+            expect(put_response).to.have.status(403);
+            return chakram.wait();
+        }); 
     });
     }
 
