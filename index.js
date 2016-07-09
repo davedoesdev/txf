@@ -4,12 +4,13 @@ var url = require('url'),
 
 module.exports = function (server, secrets)
 {
-    var senders = {}, receivers = {};
+    var senders = new Map(),
+        receivers = new Map();
 
     function check(id)
     {
-        var sender = senders[id],
-            receiver = receivers[id];
+        var sender = senders.get(id),
+            receiver = receivers.get(id);
 
         if (sender && receiver)
         {
@@ -79,21 +80,21 @@ module.exports = function (server, secrets)
                 }
             }
 
-            if (senders[id] !== undefined)
+            if (senders.has(id))
             {
                 response.writeHead(409);
                 return response.end();
             }
 
             request.response = response;
-            senders[id] = request;
+            senders.set(id, request);
 
-            var sender_done = function()
+            var sender_done = function ()
             {
-                var sender = senders[id];
+                var sender = senders.get(id);
                 if (sender === request)
                 {
-                    delete senders[id];
+                    senders.delete(id);
                 }
             };
 
@@ -127,20 +128,20 @@ module.exports = function (server, secrets)
                 }
             }
 
-            if (receivers[id] !== undefined)
+            if (receivers.has(id))
             {
                 response.writeHead(409);
                 return response.end();
             }
 
-            receivers[id] = response;
+            receivers.set(id, response);
 
-            var receiver_done = function()
+            var receiver_done = function ()
             {
-                var receiver = receivers[id];
+                var receiver = receivers.get(id);
                 if (receiver === response)
                 {
-                    delete receivers[id];
+                    receivers.delete(id);
                 }
             };
 

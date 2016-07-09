@@ -1,7 +1,8 @@
 /*
 Test different status codes
-Test no auth and auth including wrong secret
 Test content-type headers
+Test with HTTPS?
+Check all senders and receivers are deleted
 100% coverage
 Make logging optional somehow?
 */
@@ -167,6 +168,38 @@ describe('txf', function ()
             expect(put_response).to.have.status(403);
             return chakram.wait();
         }); 
+
+        it('should error if request is not put or get', function ()
+        {
+            var head_response = chakram.head(make_get_url('bar'));
+            expect(head_response).to.have.status(405);
+            return chakram.wait();
+        });
+
+        it('should cope with close and end events occurring on request', function ()
+        {
+            server.on('request', function (request, response)
+            {
+                request.on('end', function ()
+                {
+                    this.emit('close');
+                });
+
+                response.on('finish', function ()
+                {
+                    this.emit('close');
+                });
+            });
+
+            var get_response = chakram.get(make_get_url('bar'));
+            expect(get_response).to.have.status(200);
+            expect(get_response).to.have.json('hello');
+
+            var put_response = chakram.put(make_put_url('bar'), 'hello');
+            expect(put_response).to.have.status(200);
+
+            return chakram.wait();
+        });
     });
     }
 
