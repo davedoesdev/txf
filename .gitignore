@@ -1,1 +1,4 @@
 node_modules
+/test/ca.*
+/test/server.pem
+/test/server.key

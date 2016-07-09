@@ -37,6 +37,11 @@ module.exports = function (grunt)
 
             coveralls: {
                 cmd: 'cat coverage/lcov.info | coveralls'
+            },
+
+            certs: {
+                cmd: 'make -C test -f Makefile.certs',
+                fail: true
             }
         }
     });
@@ -47,7 +52,7 @@ module.exports = function (grunt)
     grunt.loadNpmTasks('grunt-bg-shell');
 
     grunt.registerTask('lint', 'jshint');
-    grunt.registerTask('test', 'mochaTest');
+    grunt.registerTask('test', ['bgShell:certs', 'mochaTest']);
     grunt.registerTask('docs', 'apidox');
     grunt.registerTask('coverage', ['bgShell:cover', 'bgShell:check_cover']);
     grunt.registerTask('coveralls', 'bgShell:coveralls');
