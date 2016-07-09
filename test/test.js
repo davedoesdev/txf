@@ -1,5 +1,4 @@
 /*
-Test content-type headers
 Test with HTTPS?
 Check all senders and receivers are deleted
 Make logging optional somehow?
@@ -51,6 +50,7 @@ describe('txf', function ()
             var get_response = chakram.get(make_get_url('bar'));
             expect(get_response).to.have.status(200);
             expect(get_response).to.have.json('hello');
+            expect(get_response).to.have.header('content-type', 'application/json');
 
             var put_response = chakram.put(make_put_url('bar'), 'hello');
             expect(put_response).to.have.status(200);
@@ -116,6 +116,7 @@ describe('txf', function ()
             .then(function (get_response)
             {
                 expect(get_response).to.have.status(200);
+                expect(get_response).to.have.header('content-type', 'application/octet-stream');
                 expect(get_response.body.equals(buf)).to.equal(true);
             }),
 
@@ -197,6 +198,30 @@ describe('txf', function ()
             expect(put_response).to.have.status(200);
 
             return chakram.wait();
+        });
+
+        it('should pass on content-type', function ()
+        {
+            var buf = crypto.randomBytes(1024);
+
+            var put_response = chakram.put(make_put_url('bar'), buf,
+            {
+                json: false,
+                headers: { 'Content-Type': 'dummy1/dummy2' }
+            });
+            expect(put_response).to.have.status(200);
+
+            return chakram.all([
+
+            chakram.get(make_get_url('bar'), { encoding: null })
+            .then(function (get_response)
+            {
+                expect(get_response).to.have.status(200);
+                expect(get_response).to.have.header('content-type', 'dummy1/dummy2');
+                expect(get_response.body.equals(buf)).to.equal(true);
+            }),
+
+            chakram.wait()]);
         });
     });
     }
