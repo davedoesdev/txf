@@ -165,4 +165,6 @@ module.exports = function (server, secrets)
             return response.end();
         }
     });
+
+    return { senders: senders, receivers: receivers }; // for testing
 };

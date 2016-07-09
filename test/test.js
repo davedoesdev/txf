@@ -1,6 +1,5 @@
 /*
 Test with HTTPS?
-Check all senders and receivers are deleted
 Make logging optional somehow?
 */
 
@@ -27,18 +26,23 @@ var secrets = {
 
 describe('txf', function ()
 {
-    var server;
+    var server, senders_and_receivers;
 
     before(function (cb)
     {
         server = http.createServer();
         server.listen(port, cb);
-        txf(server, secrets);
+        senders_and_receivers = txf(server, secrets);
     });
 
     after(function (cb)
     {
-        server.close(cb);
+        server.close(function (err)
+        {
+            expect(senders_and_receivers.senders.size === 0);
+            expect(senders_and_receivers.receivers.size === 0);
+            cb(err);
+        });
     });
 
     function test(description, make_put_url, make_get_url)
