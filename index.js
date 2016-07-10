@@ -21,8 +21,6 @@ module.exports = function (server, secrets)
 
     server.on('request', function (request, response)
     {
-        console.log(request.method, request.url);
-
         var pathname = url.parse(request.url).pathname.split('/'),
             namespace,
             digest,

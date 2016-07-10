@@ -25,7 +25,7 @@ module.exports = function (grunt)
 
         bgShell: {
             cover: {
-                cmd: './node_modules/.bin/istanbul cover ./node_modules/.bin/grunt -- test --cover',
+                cmd: './node_modules/.bin/istanbul cover ./node_modules/.bin/grunt -- test',
                 execOpts: {
                     maxBuffer: 0
                 }

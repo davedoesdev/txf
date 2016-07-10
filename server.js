@@ -14,6 +14,12 @@ console.log('starting', ip, port);
 server.listen(port, ip, function()
 {
     console.log('listening on', ip, port);
+
+    server.on('request', function (request)
+    {
+        console.log(request.method, request.url);
+    });
+
     txf(server, {
         default: { sender: default_sender_secret,
                    receiver: default_receiver_secret } });

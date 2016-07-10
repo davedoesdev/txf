@@ -1,7 +1,3 @@
-/*
-Make logging optional somehow?
-*/
-
 var fs = require('fs'),
     path = require('path'),
     https = require('https'),
