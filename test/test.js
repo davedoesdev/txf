@@ -85,7 +85,7 @@ describe('txf', function ()
         {
             this.timeout(60 * 1000);
 
-            for (var i = 0; i < 1000; i += 1)
+            for (var i = 0; i < 10; i += 1)
             {
                 var get_response = chakram.get(make_get_url('bar' + i),
                                                { agent: agent });
