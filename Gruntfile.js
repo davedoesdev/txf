@@ -26,14 +26,14 @@ module.exports = function (grunt)
         bgShell: {
             cover: {
                 cmd: './node_modules/.bin/istanbul cover ./node_modules/.bin/grunt -- test',
-                fail: true,
                 execOpts: {
                     maxBuffer: 0
                 }
             },
 
             check_cover: {
-                cmd: './node_modules/.bin/istanbul check-coverage --statement 100 --branch 100 --function 100 --line 100'
+                cmd: './node_modules/.bin/istanbul check-coverage --statement 100 --branch 100 --function 100 --line 100',
+                fail: true
             },
 
             coveralls: {
