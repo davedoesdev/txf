@@ -26,6 +26,7 @@ module.exports = function (grunt)
         bgShell: {
             cover: {
                 cmd: './node_modules/.bin/istanbul cover ./node_modules/.bin/grunt -- test',
+                fail: true,
                 execOpts: {
                     maxBuffer: 0
                 }
@@ -37,7 +38,8 @@ module.exports = function (grunt)
             },
 
             coveralls: {
-                cmd: 'cat coverage/lcov.info | coveralls'
+                cmd: 'cat coverage/lcov.info | coveralls',
+                fail: true
             },
 
             certs: {
