@@ -196,7 +196,7 @@ grunt coverage
 
 Coveralls page is [here](https://coveralls.io/r/davedoesdev/txf).
 
-#API
+# API
 
 _Source: [index.js](/index.js)_
 

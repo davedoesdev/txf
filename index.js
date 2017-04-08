@@ -197,7 +197,7 @@ grunt coverage
 
 Coveralls page is [here](https://coveralls.io/r/davedoesdev/txf).
 
-#API
+# API
 */
 var url = require('url'),
     crypto = require('crypto');
