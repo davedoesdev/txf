@@ -1,9 +1,11 @@
-sudo: required
-dist: trusty
+dist: bionic
 language: node_js
 node_js:
   - 4
   - 6
   - 8
+  - 10
+  - 12
+  - 13
 script:
   - npm run travis-test
