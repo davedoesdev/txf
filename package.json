@@ -1,7 +1,7 @@
 {
   "name": "txf",
   "description": "File transfer service. Pipes PUT to GET. HMAC access control.",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "homepage": "https://github.com/davedoesdev/txf",
   "author": {
     "name": "David Halls",
