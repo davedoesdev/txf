@@ -2,8 +2,8 @@ var fs = require('fs'),
     path = require('path'),
     https = require('https'),
     crypto = require('crypto'),
-    chakram = require('chakram'),
-    expect = chakram.expect,
+    got = require('got'),
+    expect = require('chai').expect,
     txf = require('..');
 
 var port = 8700;
@@ -35,7 +35,7 @@ function make_server(protocol, cb)
     return server;
 }
 
-function stest(protocol, agent)
+function stest(protocol, options)
 {
     var url = protocol + '://localhost:' + port + '/';
 describe(protocol, function ()
@@ -65,164 +65,175 @@ describe('txf', function ()
     {
     describe(description, function ()
     {
-        it('should transfer data', function ()
+        it('should transfer data', async function ()
         {
-            var get_response = chakram.get(make_get_url('bar'),
-                                           { agent: agent });
-            expect(get_response).to.have.status(200);
-            expect(get_response).to.have.json('hello');
-            expect(get_response).to.have.header('content-type', 'application/json');
+            const getP = got(make_get_url('bar'), options);
+            const putP = got.put(make_put_url('bar'), {
+                ...options,
+                json: 'hello'
+            });
 
-            var put_response = chakram.put(make_put_url('bar'),
-                                           'hello',
-                                           { agent: agent });
-            expect(put_response).to.have.status(200);
+            const get_response = await getP;
+            expect(get_response.statusCode).equal(200);
+            expect(get_response.headers['content-type']).to.equal('application/json');
+            expect(await getP.json()).to.equal('hello');
 
-            return chakram.wait();
+            const put_response = await putP;
+            expect(put_response.statusCode).to.equal(200);
         });
 
-        it('should support multiple transfers at the same time', function ()
+        it('should support multiple transfers at the same time', async function ()
         {
             this.timeout(60 * 1000);
 
-            for (var i = 0; i < 100; i += 1)
+            for (let i = 0; i < 100; i += 1)
             {
-                var get_response = chakram.get(make_get_url('bar' + i),
-                                               { agent: agent });
-                expect(get_response).to.have.status(200);
-                expect(get_response).to.have.json('hello' + i);
+                const getP = got(make_get_url('bar' + i), options);
+                const putP = got.put(make_put_url('bar' + i), {
+                    ...options,
+                    json: {
+                        foo: 'hello',
+                        num: i,
+                    }
+                });
 
-                var put_response = chakram.put(make_put_url('bar' + i),
-                                               'hello' + i,
-                                               { agent: agent });
-                expect(put_response).to.have.status(200);
+                const get_response = await getP;
+                expect(get_response.statusCode).to.equal(200);
+                expect(await getP.json()).to.deep.equal({
+                    foo: 'hello',
+                    num: i
+                });
+
+                const put_response = await putP;
+                expect(put_response.statusCode).to.equal(200);
             }
-
-            return chakram.wait();
         });
 
-        it('should error if get request is in progress', function ()
+        it('should error if get request is in progress', async function ()
         {
-            var get_response = chakram.get(make_get_url('bar'),
-                                           { agent: agent });
-            expect(get_response).to.have.status(200);
-            expect(get_response).to.have.json('hello');
+            const getP = got(make_get_url('bar'), options);
 
-            expect(chakram.get(make_get_url('bar'),
-                               { agent: agent })).to.have.status(409);
+            expect((await got(make_get_url('bar'), {
+                ...options,
+                throwHttpErrors: false
+            })).statusCode).to.equal(409);
 
-            var put_response = chakram.put(make_put_url('bar'),
-                                           'hello',
-                                           { agent: agent });
-            expect(put_response).to.have.status(200);
+            const putP = got.put(make_put_url('bar'), {
+                ...options,
+                json: 'hello'
+            });
 
-            return chakram.wait();
+            const get_response = await getP;
+            expect(get_response.statusCode).to.equal(200);
+            expect(await getP.json()).to.equal('hello');
+
+            const put_response = await putP;
+            expect(put_response.statusCode).to.equal(200);
         });
 
-        it('should error if put request is in progress', function ()
+        it('should error if put request is in progress', async function ()
         {
-            var put_response = chakram.put(make_put_url('bar'),
-                                           'hello',
-                                           { agent: agent });
-            expect(put_response).to.have.status(200);
+            const putP = got.put(make_put_url('bar'), {
+                ...options,
+                json: 'hello'
+            });
 
-            expect(chakram.put(make_put_url('bar'),
-                               'hello',
-                               { agent: agent })).to.have.status(409);
+            expect((await got.put(make_put_url('bar'), {
+                ...options,
+                json: 'hello',
+                throwHttpErrors: false
+            })).statusCode).to.equal(409);
 
-            var get_response = chakram.get(make_get_url('bar'),
-                                           { agent: agent });
-            expect(get_response).to.have.status(200);
-            expect(get_response).to.have.json('hello');
+            const getP = got(make_get_url('bar'), options);
+            const get_response = await getP;
+            expect(get_response.statusCode).to.equal(200);
+            expect(await getP.json()).to.equal('hello');
 
-            return chakram.wait();
+            const put_response = await putP;
+            expect(put_response.statusCode).to.equal(200);
         });
 
-        it('should support large transfers', function ()
+        it('should support large transfers', async function ()
         {
-            var buf = crypto.randomBytes(1024 * 1024);
+            const buf = crypto.randomBytes(1024 * 1024);
 
-            var put_response = chakram.put(make_put_url('bar'),
-                                           buf,
-                                           { json: false, agent: agent });
-            expect(put_response).to.have.status(200);
+            const putP = got.put(make_put_url('bar'), {
+                ...options,
+                body: buf
+            });
 
-            return chakram.all([
+            const getP = got(make_get_url('bar'), options);
+            const get_response = await getP;
+            expect(get_response.statusCode).equal(200);
+            expect(get_response.headers['content-type']).to.equal('application/octet-stream');
+            expect((await getP.buffer()).equals(buf)).to.be.true;
 
-            chakram.get(make_get_url('bar'),
-                        { encoding: null, agent: agent })
-            .then(function (get_response)
-            {
-                expect(get_response).to.have.status(200);
-                expect(get_response).to.have.header('content-type', 'application/octet-stream');
-                expect(get_response.body.equals(buf)).to.equal(true);
-            }),
-
-            chakram.wait()]);
+            const put_response = await putP;
+            expect(put_response.statusCode).to.equal(200);
         });
 
-        it('should error if too many levels in path', function ()
+        it('should error if too many levels in path', async function ()
         {
-            var get_response = chakram.get(make_get_url('bar/dummy1/dummy2'),
-                                           { agent: agent });
-            expect(get_response).to.have.status(400);
-            return chakram.wait();
+            expect((await got(make_get_url('bar/dummy1/dummy2'), {
+                ...options,
+                throwHttpErrors: false
+            })).statusCode).to.equal(400);
         });
 
-        it('should error if namespace unknown', function ()
+        it('should error if namespace unknown', async function ()
         {
-            var get_response = chakram.get(make_get_url('bar', 'dummy'),
-                                           { agent: agent });
-            expect(get_response).to.have.status(403);
-            return chakram.wait();
+            expect((await got(make_get_url('bar', 'dummy'), {
+                ...options,
+                throwHttpErrors: false
+            })).statusCode).to.equal(403);
         });
 
         if (description === 'auth')
         {
-            it('should error if receiver digest is wrong', function ()
+            it('should error if receiver digest is wrong', async function ()
             {
-                var get_response = chakram.get(make_put_url('bar'),
-                                               { agent: agent });
-                expect(get_response).to.have.status(404);
-                return chakram.wait();
+                expect((await got(make_put_url('bar'), {
+                    ...options,
+                    throwHttpErrors: false
+                })).statusCode).to.equal(404);
             });
 
-            it('should error if sender digest is wrong', function ()
+            it('should error if sender digest is wrong', async function ()
             {
-                var put_response = chakram.put(make_get_url('bar'),
-                                               'hello',
-                                               { agent: agent });
-                expect(put_response).to.have.status(404);
-                return chakram.wait();
+                expect((await got.put(make_get_url('bar'), {
+                    ...options,
+                    json: 'hello',
+                    throwHttpErrors: false
+                })).statusCode).to.equal(404);
             });
         }
 
-        it('should error if namespace has no receiver key', function ()
+        it('should error if namespace has no receiver key', async function ()
         {
-            var get_response = chakram.get(make_get_url('bar', 'no_keys'),
-                                           { agent: agent });
-            expect(get_response).to.have.status(403);
-            return chakram.wait();
+            expect((await got(make_get_url('bar', 'no_keys'), {
+                ...options,
+                throwHttpErrors: false
+            })).statusCode).to.equal(403);
         });
 
-        it('should error if namespace has no sender key', function ()
+        it('should error if namespace has no sender key', async function ()
         {
-            var put_response = chakram.put(make_put_url('bar', 'no_keys'),
-                                           'hello',
-                                           { agent: agent });
-            expect(put_response).to.have.status(403);
-            return chakram.wait();
+            expect((await got.put(make_put_url('bar', 'no_keys'), {
+                ...options,
+                json: 'hello',
+                throwHttpErrors: false
+            })).statusCode).to.equal(403);
         }); 
 
-        it('should error if request is not put or get', function ()
+        it('should error if request is not put or get', async function ()
         {
-            var head_response = chakram.head(make_get_url('bar'),
-                                             { agent: agent });
-            expect(head_response).to.have.status(405);
-            return chakram.wait();
+            expect((await got.head(make_get_url('bar'), {
+                ...options,
+                throwHttpErrors: false
+            })).statusCode).to.equal(405);
         });
 
-        it('should cope with close and end events occurring on request', function ()
+        it('should cope with close and end events occurring on request', async function ()
         {
             server.on('request', function (request, response)
             {
@@ -237,43 +248,40 @@ describe('txf', function ()
                 });
             });
 
-            var get_response = chakram.get(make_get_url('bar'),
-                                           { agent: agent });
-            expect(get_response).to.have.status(200);
-            expect(get_response).to.have.json('hello');
+            const getP = got(make_get_url('bar'), options);
+            const putP = got.put(make_put_url('bar'), {
+                ...options,
+                json: 'hello'
+            });
 
-            var put_response = chakram.put(make_put_url('bar'),
-                                           'hello',
-                                           { agent: agent });
-            expect(put_response).to.have.status(200);
+            const get_response = await getP;
+            expect(get_response.statusCode).equal(200);
+            expect(await getP.json()).to.equal('hello');
 
-            return chakram.wait();
+            const put_response = await putP;
+            expect(put_response.statusCode).to.equal(200);
         });
 
-        it('should pass on content-type', function ()
+        it('should pass on content-type', async function ()
         {
-            var buf = crypto.randomBytes(1024);
+            const buf = crypto.randomBytes(1024);
 
-            var put_response = chakram.put(make_put_url('bar'), buf,
-            {
-                json: false,
-                headers: { 'Content-Type': 'dummy1/dummy2' },
-                agent: agent
+            const putP = got.put(make_put_url('bar'), {
+                ...options,
+                body: buf,
+                headers: {
+                    'Content-Type': 'dummy1/dummy2'
+                }
             });
-            expect(put_response).to.have.status(200);
 
-            return chakram.all([
+            const getP = got(make_get_url('bar'), options);
+            const get_response = await getP;
+            expect(get_response.statusCode).equal(200);
+            expect(get_response.headers['content-type']).to.equal('dummy1/dummy2');
+            expect((await getP.buffer()).equals(buf)).to.be.true;
 
-            chakram.get(make_get_url('bar'),
-                        { encoding: null, agent: agent })
-            .then(function (get_response)
-            {
-                expect(get_response).to.have.status(200);
-                expect(get_response).to.have.header('content-type', 'dummy1/dummy2');
-                expect(get_response.body.equals(buf)).to.equal(true);
-            }),
-
-            chakram.wait()]);
+            const put_response = await putP;
+            expect(put_response.statusCode).to.equal(200);
         });
     });
     }
@@ -319,10 +327,12 @@ describe('txf-no-secerts', function ()
         server.close(cb);
     });
 
-    it('should error when no secrets have been supplied', function ()
+    it('should error when no secrets have been supplied', async function ()
     {
-        var get_response = chakram.get(url + 'foo/bar', { agent: agent });
-        return expect(get_response).to.have.status(403);
+        expect((await got(url + 'foo/bar', {
+            ...options,
+            throwHttpErrors: false
+        })).statusCode).to.equal(403);
     });
 });
 
@@ -330,7 +340,8 @@ describe('txf-no-secerts', function ()
 }
 
 stest('http');
-stest('https', new https.Agent(
-{
-    ca: fs.readFileSync(path.join(__dirname, 'ca.pem'))
+stest('https', ({
+    https: {
+        certificateAuthority: fs.readFileSync(path.join(__dirname, 'ca.pem'))
+    }
 }));

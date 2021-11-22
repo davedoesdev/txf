@@ -1,5 +1,5 @@
 /node_modules
-/.nyc_output
+/coverage/tmp
 /test/ca.*
 /test/server.pem
 /test/server.key

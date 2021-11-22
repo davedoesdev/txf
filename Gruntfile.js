@@ -1,18 +1,16 @@
 /*jslint node: true */
 "use strict";
 
+const c8 = "npx c8 -x Gruntfile.js -x 'test/**'";
+
 module.exports = function (grunt)
 {
     grunt.initConfig(
     {
         jshint: {
-            src: [ '*.js', 'test/**/*.js' ]
-        },
-
-        mochaTest: {
-            src: ['test/*.js'],
+            src: [ '*.js', 'test/**/*.js' ],
             options: {
-                bail: true
+                esversion: 6
             }
         },
 
@@ -23,30 +21,28 @@ module.exports = function (grunt)
             extraHeadingLevels: 1
         },
 
-        exec: {
-            cover: "./node_modules/.bin/nyc -x Gruntfile.js -x 'test/**' ./node_modules/.bin/grunt test",
+        exec: Object.fromEntries(Object.entries({
+            test: 'mocha --bail',
 
-            cover_report: './node_modules/.bin/nyc report -r lcov',
+            cover: `${c8} npx grunt test`,
 
-            cover_check: './node_modules/.bin/nyc check-coverage --statements 100 --branches 100 --functions 100 --lines 100',
+            cover_report: `${c8} report -r lcov`,
 
-            coveralls: 'cat coverage/lcov.info | coveralls',
+            cover_check: `${c8} check-coverage --statements 100 --branches 100 --functions 100 --lines 100`,
 
             certs: 'make -C test -f Makefile.certs'
-        }
+        }).map(([k, cmd]) => [k, { cmd, stdio: 'inherit' }]))
     });
     
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-apidox');
     grunt.loadNpmTasks('grunt-exec');
 
     grunt.registerTask('lint', 'jshint');
-    grunt.registerTask('test', ['exec:certs', 'mochaTest']);
+    grunt.registerTask('test', ['exec:certs', 'exec:test']);
     grunt.registerTask('docs', 'apidox');
     grunt.registerTask('coverage', ['exec:cover',
                                     'exec:cover_report',
                                     'exec:cover_check']);
-    grunt.registerTask('coveralls', 'exec:coveralls');
     grunt.registerTask('default', ['lint', 'test']);
 };

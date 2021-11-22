@@ -1,7 +1,7 @@
 {
   "name": "txf",
   "description": "File transfer service. Pipes PUT to GET. HMAC access control.",
-  "version": "2.0.3",
+  "version": "3.0.0",
   "homepage": "https://github.com/davedoesdev/txf",
   "author": {
     "name": "David Halls",
@@ -18,9 +18,7 @@
   "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "start": "supervisor server.js",
-    "test": "grunt lint test",
-    "travis-test": "grunt lint coverage coveralls"
+    "test": "grunt lint test"
   },
   "keywords": [
     "file",
@@ -28,18 +26,15 @@
     "transfer"
   ],
   "engines": {
-    "node": ">= 8"
+    "node": ">= 12"
   },
   "devDependencies": {
-    "grunt": "^1.2.1",
-    "grunt-contrib-jshint": "^2.1.0",
-    "grunt-mocha-test": "^0.13.3",
-    "grunt-apidox": "^2.0.10",
+    "chai": "^4.3.4",
+    "got": "^11.8.3",
+    "grunt": "^1.4.1",
+    "grunt-apidox": "^2.0.14",
+    "grunt-contrib-jshint": "^3.1.1",
     "grunt-exec": "^3.0.0",
-    "mocha": "^8.1.1",
-    "chai": "^4.2.0",
-    "nyc": "^15.1.0",
-    "coveralls": "^3.1.0",
-    "chakram": "^1.5.0"
+    "mocha": "^9.1.3"
   }
 }
