@@ -1,5 +1,5 @@
 /*
-# txf&nbsp;&nbsp;&nbsp;[![Build Status](https://travis-ci.org/davedoesdev/txf.png)](https://travis-ci.org/davedoesdev/txf) [![Coverage Status](https://coveralls.io/repos/davedoesdev/txf/badge.png?branch=master&service=github)](https://coveralls.io/r/davedoesdev/txf?branch=master) [![NPM version](https://badge.fury.io/js/txf.png)](http://badge.fury.io/js/txf)
+# txf&nbsp;&nbsp;&nbsp;[[![Build Status](https://github.com/davedoesdev/txf/actions/workflows/ci.yml/badge.svg)](https://github.com/davedoesdev/txf/actions/workflows/ci.yml) [![Coverage Status](https://coveralls.io/repos/davedoesdev/txf/badge.png?branch=master&service=github)](https://coveralls.io/r/davedoesdev/txf?branch=master) [![NPM version](https://badge.fury.io/js/txf.png)](http://badge.fury.io/js/txf)
 
 File transfer service which pipes PUT requests to matching GET requests.
 
