@@ -166,7 +166,7 @@ describe('txf', function ()
             const get_response = await getP;
             expect(get_response.statusCode).equal(200);
             expect(get_response.headers['content-type']).to.equal('application/octet-stream');
-            expect((await getP.buffer()).equals(buf)).to.be.true;
+            expect((await getP.buffer()).equals(buf)).to.equal(true);
 
             const put_response = await putP;
             expect(put_response.statusCode).to.equal(200);
@@ -278,7 +278,7 @@ describe('txf', function ()
             const get_response = await getP;
             expect(get_response.statusCode).equal(200);
             expect(get_response.headers['content-type']).to.equal('dummy1/dummy2');
-            expect((await getP.buffer()).equals(buf)).to.be.true;
+            expect((await getP.buffer()).equals(buf)).to.equal(true);
 
             const put_response = await putP;
             expect(put_response.statusCode).to.equal(200);
