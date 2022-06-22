@@ -2,9 +2,32 @@ var fs = require('fs'),
     path = require('path'),
     https = require('https'),
     crypto = require('crypto'),
-    got = require('got'),
     expect = require('chai').expect,
     txf = require('..');
+
+function _got(method, ...args) {
+    let gp;
+    const p = new Promise((resolve, reject) => {
+        import('got').then(got => {
+            resolve(gp = got.default[method](...args));
+        }).catch(reject);
+    });
+    p.json = () => gp.json();
+    p.buffer = () => gp.buffer();
+    return p;
+}
+
+function get(...args) {
+    return _got('get', ...args);
+}
+
+function put(...args) {
+    return _got('put', ...args);
+}
+
+function head(...args) {
+    return _got('head', ...args);
+}
 
 var port = 8700;
 
@@ -38,7 +61,7 @@ function make_server(protocol, cb)
 function stest(protocol, options)
 {
     var url = protocol + '://localhost:' + port + '/';
-describe(protocol, function ()
+describe(protocol, async function ()
 {
 
 describe('txf', function ()
@@ -67,8 +90,8 @@ describe('txf', function ()
     {
         it('should transfer data', async function ()
         {
-            const getP = got(make_get_url('bar'), options);
-            const putP = got.put(make_put_url('bar'), {
+            const getP = get(make_get_url('bar'), options);
+            const putP = put(make_put_url('bar'), {
                 ...options,
                 json: 'hello'
             });
@@ -88,8 +111,8 @@ describe('txf', function ()
 
             for (let i = 0; i < 100; i += 1)
             {
-                const getP = got(make_get_url('bar' + i), options);
-                const putP = got.put(make_put_url('bar' + i), {
+                const getP = get(make_get_url('bar' + i), options);
+                const putP = put(make_put_url('bar' + i), {
                     ...options,
                     json: {
                         foo: 'hello',
@@ -111,14 +134,14 @@ describe('txf', function ()
 
         it('should error if get request is in progress', async function ()
         {
-            const getP = got(make_get_url('bar'), options);
+            const getP = get(make_get_url('bar'), options);
 
-            expect((await got(make_get_url('bar'), {
+            expect((await get(make_get_url('bar'), {
                 ...options,
                 throwHttpErrors: false
             })).statusCode).to.equal(409);
 
-            const putP = got.put(make_put_url('bar'), {
+            const putP = put(make_put_url('bar'), {
                 ...options,
                 json: 'hello'
             });
@@ -133,18 +156,18 @@ describe('txf', function ()
 
         it('should error if put request is in progress', async function ()
         {
-            const putP = got.put(make_put_url('bar'), {
+            const putP = put(make_put_url('bar'), {
                 ...options,
                 json: 'hello'
             });
 
-            expect((await got.put(make_put_url('bar'), {
+            expect((await put(make_put_url('bar'), {
                 ...options,
                 json: 'hello',
                 throwHttpErrors: false
             })).statusCode).to.equal(409);
 
-            const getP = got(make_get_url('bar'), options);
+            const getP = get(make_get_url('bar'), options);
             const get_response = await getP;
             expect(get_response.statusCode).to.equal(200);
             expect(await getP.json()).to.equal('hello');
@@ -157,12 +180,12 @@ describe('txf', function ()
         {
             const buf = crypto.randomBytes(1024 * 1024);
 
-            const putP = got.put(make_put_url('bar'), {
+            const putP = put(make_put_url('bar'), {
                 ...options,
                 body: buf
             });
 
-            const getP = got(make_get_url('bar'), options);
+            const getP = get(make_get_url('bar'), options);
             const get_response = await getP;
             expect(get_response.statusCode).equal(200);
             expect(get_response.headers['content-type']).to.equal('application/octet-stream');
@@ -174,7 +197,7 @@ describe('txf', function ()
 
         it('should error if too many levels in path', async function ()
         {
-            expect((await got(make_get_url('bar/dummy1/dummy2'), {
+            expect((await get(make_get_url('bar/dummy1/dummy2'), {
                 ...options,
                 throwHttpErrors: false
             })).statusCode).to.equal(400);
@@ -182,7 +205,7 @@ describe('txf', function ()
 
         it('should error if namespace unknown', async function ()
         {
-            expect((await got(make_get_url('bar', 'dummy'), {
+            expect((await get(make_get_url('bar', 'dummy'), {
                 ...options,
                 throwHttpErrors: false
             })).statusCode).to.equal(403);
@@ -192,7 +215,7 @@ describe('txf', function ()
         {
             it('should error if receiver digest is wrong', async function ()
             {
-                expect((await got(make_put_url('bar'), {
+                expect((await get(make_put_url('bar'), {
                     ...options,
                     throwHttpErrors: false
                 })).statusCode).to.equal(404);
@@ -200,7 +223,7 @@ describe('txf', function ()
 
             it('should error if sender digest is wrong', async function ()
             {
-                expect((await got.put(make_get_url('bar'), {
+                expect((await put(make_get_url('bar'), {
                     ...options,
                     json: 'hello',
                     throwHttpErrors: false
@@ -210,7 +233,7 @@ describe('txf', function ()
 
         it('should error if namespace has no receiver key', async function ()
         {
-            expect((await got(make_get_url('bar', 'no_keys'), {
+            expect((await get(make_get_url('bar', 'no_keys'), {
                 ...options,
                 throwHttpErrors: false
             })).statusCode).to.equal(403);
@@ -218,7 +241,7 @@ describe('txf', function ()
 
         it('should error if namespace has no sender key', async function ()
         {
-            expect((await got.put(make_put_url('bar', 'no_keys'), {
+            expect((await put(make_put_url('bar', 'no_keys'), {
                 ...options,
                 json: 'hello',
                 throwHttpErrors: false
@@ -227,7 +250,7 @@ describe('txf', function ()
 
         it('should error if request is not put or get', async function ()
         {
-            expect((await got.head(make_get_url('bar'), {
+            expect((await head(make_get_url('bar'), {
                 ...options,
                 throwHttpErrors: false
             })).statusCode).to.equal(405);
@@ -248,8 +271,8 @@ describe('txf', function ()
                 });
             });
 
-            const getP = got(make_get_url('bar'), options);
-            const putP = got.put(make_put_url('bar'), {
+            const getP = get(make_get_url('bar'), options);
+            const putP = put(make_put_url('bar'), {
                 ...options,
                 json: 'hello'
             });
@@ -266,7 +289,7 @@ describe('txf', function ()
         {
             const buf = crypto.randomBytes(1024);
 
-            const putP = got.put(make_put_url('bar'), {
+            const putP = put(make_put_url('bar'), {
                 ...options,
                 body: buf,
                 headers: {
@@ -274,7 +297,7 @@ describe('txf', function ()
                 }
             });
 
-            const getP = got(make_get_url('bar'), options);
+            const getP = get(make_get_url('bar'), options);
             const get_response = await getP;
             expect(get_response.statusCode).equal(200);
             expect(get_response.headers['content-type']).to.equal('dummy1/dummy2');
@@ -329,7 +352,7 @@ describe('txf-no-secerts', function ()
 
     it('should error when no secrets have been supplied', async function ()
     {
-        expect((await got(url + 'foo/bar', {
+        expect((await get(url + 'foo/bar', {
             ...options,
             throwHttpErrors: false
         })).statusCode).to.equal(403);
