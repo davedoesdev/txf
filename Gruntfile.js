@@ -10,7 +10,7 @@ module.exports = function (grunt)
         jshint: {
             src: [ '*.js', 'test/**/*.js' ],
             options: {
-                esversion: 9
+                esversion: 11
             }
         },
 
