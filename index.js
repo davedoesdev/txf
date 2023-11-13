@@ -286,13 +286,13 @@ module.exports = function (server, secrets)
         }
         else
         {
-            response.writeHead(400);
+            response.statusCode = 400;
             return response.end();
         }
 
         if (!secrets)
         {
-            response.writeHead(403);
+            response.statusCode = 403;
             return response.end();
         }
 
@@ -300,7 +300,7 @@ module.exports = function (server, secrets)
 
         if (keys === undefined)
         {
-            response.writeHead(403);
+            response.statusCode = 403;
             return response.end();
         }
 
@@ -310,7 +310,7 @@ module.exports = function (server, secrets)
 
             if (sender_key === undefined)
             {
-                response.writeHead(403);
+                response.statusCode = 403;
                 return response.end();
             }
 
@@ -320,14 +320,14 @@ module.exports = function (server, secrets)
                 sender_hmac.update(id);
                 if (sender_hmac.digest('hex') !== digest)
                 {
-                    response.writeHead(404);
+                    response.statusCode = 404;
                     return response.end();
                 }
             }
 
             if (senders.has(id))
             {
-                response.writeHead(409);
+                response.statusCode = 409;
                 return response.end();
             }
 
@@ -358,7 +358,7 @@ module.exports = function (server, secrets)
 
             if (receiver_key === undefined)
             {
-                response.writeHead(403);
+                response.statusCode = 403;
                 return response.end();
             }
 
@@ -368,14 +368,14 @@ module.exports = function (server, secrets)
                 receiver_hmac.update(id);
                 if (receiver_hmac.digest('hex') !== digest)
                 {
-                    response.writeHead(404);
+                    response.statusCode = 404;
                     return response.end();
                 }
             }
 
             if (receivers.has(id))
             {
-                response.writeHead(409);
+                response.statusCode = 409;
                 return response.end();
             }
 
@@ -395,9 +395,7 @@ module.exports = function (server, secrets)
                 response.on('close', function ()
                 {
                     sender.unpipe(response);
-                    if (!sender.response.headersSent) {
-                        sender.response.writeHead(504);
-                    }
+                    sender.response.statusCode = 504;
                     sender.response.end();
                 });
             });
@@ -408,7 +406,7 @@ module.exports = function (server, secrets)
         }
         else
         {
-            response.writeHead(405);
+            response.statusCode = 405;
             return response.end();
         }
     });
