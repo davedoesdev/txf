@@ -217,7 +217,7 @@ not required.
 
 **Parameters:**
 
-- `{http.Server | https.Server} server` [HTTP](https://nodejs.org/dist/latest-v4.x/docs/api/http.html#http_class_http_server) or [HTTPS](https://nodejs.org/dist/latest-v4.x/docs/api/https.html#https_class_https_server) server which `txf` will use to listen for requests. It's up to the caller to set up the server (e.g. listen on a port). HTTPS servers will need to know about their certificates and keys. See `make_server()` in `test/test.js` for an example.
+- `{[object Object] | [object Object]} server` [HTTP](https://nodejs.org/dist/latest-v4.x/docs/api/http.html#http_class_http_server) or [HTTPS](https://nodejs.org/dist/latest-v4.x/docs/api/https.html#https_class_https_server) server which `txf` will use to listen for requests. It's up to the caller to set up the server (e.g. listen on a port). HTTPS servers will need to know about their certificates and keys. See `make_server()` in `test/test.js` for an example.
 - `{Object} secrets` A dictionary of valid namespaces. Each entry in `secrets` should be a mapping from a namespace to a dictionary of HMAC keys, one for PUT requests (senders) and one for GET requests (receivers).
 
 

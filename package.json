@@ -1,7 +1,7 @@
 {
   "name": "txf",
   "description": "File transfer service. Pipes PUT to GET. HMAC access control.",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "homepage": "https://github.com/davedoesdev/txf",
   "author": {
     "name": "David Halls",
@@ -26,24 +26,21 @@
     "transfer"
   ],
   "engines": {
-    "node": ">= 14"
+    "node": ">= 16"
   },
   "devDependencies": {
-    "c8": "^7.11.3",
-    "chai": "^4.3.6",
-    "got": "^12.1.0",
-    "grunt": "^1.5.3",
-    "grunt-apidox": "^2.0.17",
+    "c8": "^8.0.1",
+    "chai": "^4.3.10",
+    "got": "^13.0.0",
+    "grunt": "^1.6.1",
+    "grunt-apidox": "^3.1.0",
     "grunt-contrib-jshint": "^3.2.0",
     "grunt-exec": "^3.0.0",
-    "mocha": "^10.0.0"
+    "mocha": "^10.2.0"
   },
   "overrides": {
-    "jsdoctypeparser": {
-      "lodash": "^4.17.21"
-    },
-    "dox": {
-      "markdown-it": "^12.3.2"
+    "apidox": {
+      "dox": "^1.0.0"
     }
   }
 }

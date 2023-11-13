@@ -395,7 +395,9 @@ module.exports = function (server, secrets)
                 response.on('close', function ()
                 {
                     sender.unpipe(response);
-                    sender.response.writeHead(504);
+                    if (!sender.response.headersSent) {
+                        sender.response.writeHead(504);
+                    }
                     sender.response.end();
                 });
             });
